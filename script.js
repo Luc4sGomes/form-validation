@@ -1,5 +1,4 @@
 const fields = document.querySelectorAll("[required]"); //procurando todas as tagas que tem o atributo required
-console.log(fields);
 
 function validateField(field) {
   function verifyErrors() {
@@ -11,15 +10,29 @@ function validateField(field) {
       }
     }
 
-    console.log(foundError);
-
     return foundError;
   }
 
+  function customMessage(typeError) {
+    const messages = {
+      text: {
+        valueMissing: "Por Favor preencha este campo"
+      },
+      email: {
+        valueMissing: "Email é obrigatorio",
+        typeMismatch: "Por favor, preencha um email válido"
+      }
+    };
+
+    return messages[field.type][typeError];
+  }
+
   function setCustomMessage(message) {
+    const spanError = field.parentNode.querySelector("span.error");
+
     if (message) {
       spanError.classList.add("active");
-      spanError.innerHTML = "campo obrigatorio";
+      spanError.innerHTML = message;
     } else {
       spanError.classList.remove("active");
       spanError.innerHTML = "";
@@ -27,9 +40,15 @@ function validateField(field) {
   }
 
   return function () {
+    const error = verifyErrors();
+
     if (verifyErrors()) {
-      setCustomMessage("Campo Obrigatorio");
+      const message = customMessage(error);
+
+      field.style.borderColor = "red";
+      setCustomMessage(message);
     } else {
+      field.style.borderColor = "green";
       setCustomMessage();
     }
   };
@@ -37,10 +56,11 @@ function validateField(field) {
 
 function customValidation(event) {
   //eliminar o bubble
-  event.preventDefault();
 
   const field = event.target;
-  const validation = valideField(field);
+  const validation = validateField(field);
+
+  validation();
 
   //logica para verificar se existem erros
 
@@ -53,14 +73,8 @@ function customValidation(event) {
       }
     }
 
-    console.log(foundError);
-
     return foundError;
   }
-
-  console.log("erro existe: ", error);
-
-  const spanError = field.parentNode.querySelector("span.error");
 }
 
 for (let field of fields) {
